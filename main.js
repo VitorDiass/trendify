@@ -3,7 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var electron_1 = require("electron");
 var path = require("path");
 var url = require("url");
-var usb = require("node-hid");
+var adb = require("adbkit");
+var Promise = require('bluebird');
 var win, serve;
 var args = process.argv.slice(1);
 serve = args.some(function (val) { return val === '--serve'; });
@@ -50,19 +51,35 @@ try {
     // Some APIs can only be used after this event occurs.
     electron_1.app.on('ready', function () {
         createWindow();
+        var client = adb.createClient();
+        client.push("0b4210de0204", "./teste.txt", '/sdcard')
+            .then(function (transfer) {
+            return new Promise(function (resolve, reject) {
+                transfer.on('end', function () {
+                    console.log("ended");
+                    resolve();
+                });
+            });
+        });
         electron_1.ipcMain.on("syncMessage", function (event, arg) {
             console.log(arg);
             event.returnValue = { device: 1, name: "teste" };
         });
-        var devices = usb.devices();
-        var deviceInfo = devices.find(function (elem) {
-            return elem.vendorId === 1452 && elem.productId === 34304;
-        });
-        if (deviceInfo) {
-            var device = new usb.HID(deviceInfo.path);
-            if (device) {
-            }
-        }
+        // const devices = usb.devices();
+        // console.log(devices);
+        // let deviceInfo = devices.find( elem => {
+        //   return elem.vendorId === 1452 && elem.productId === 34304
+        // })
+        // if(deviceInfo){
+        //   try{
+        //   const device = new usb.HID(deviceInfo.path);
+        //   if(device) {
+        //   }
+        // }
+        //   catch(e){
+        //     console.log(e);
+        //   }
+        // }
     });
     // Quit when all windows are closed.
     electron_1.app.on('window-all-closed', function () {

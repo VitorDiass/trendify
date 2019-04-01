@@ -83,6 +83,7 @@
   },
   "dependencies": {
     "@types/node-hid": "^0.7.0",
+    "adbkit": "^2.11.0",
     "node-hid": "^0.7.7"
   }
 }

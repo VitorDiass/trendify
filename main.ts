@@ -2,6 +2,8 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as usb from 'node-hid';
+import * as adb from 'adbkit';
+var Promise = require('bluebird');
 
 let win, serve;
 const args = process.argv.slice(1);
@@ -57,27 +59,41 @@ try {
   // Some APIs can only be used after this event occurs.
   app.on('ready', () => {
     createWindow();
+    const client = adb.createClient();
+
+    client.push("0b4210de0204","./teste.txt",'/sdcard')
+    .then( (transfer : any) => {
+        return new Promise( (resolve : any,reject : any) => {
+          transfer.on('end', () => {
+            console.log("ended");
+            resolve();
+          })
+        } 
+        )}
+    )
+
     ipcMain.on("syncMessage", (event,arg) => {
       console.log(arg);
       event.returnValue = { device : 1, name : "teste" };
     })
-    const devices = usb.devices();
-    let deviceInfo = devices.find( elem => {
-      return elem.vendorId === 1452 && elem.productId === 34304
-    })
+    // const devices = usb.devices();
+    // console.log(devices);
+    // let deviceInfo = devices.find( elem => {
+    //   return elem.vendorId === 1452 && elem.productId === 34304
+    // })
 
-    if(deviceInfo){
-      try{
-      const device = new usb.HID(deviceInfo.path);
+    // if(deviceInfo){
+    //   try{
+    //   const device = new usb.HID(deviceInfo.path);
 
-      if(device) {
+    //   if(device) {
 
-      }
-    }
-      catch(e){
-        console.log(e);
-      }
-    }
+    //   }
+    // }
+    //   catch(e){
+    //     console.log(e);
+    //   }
+    // }
   });
 
   // Quit when all windows are closed.
