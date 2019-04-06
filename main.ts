@@ -1,9 +1,14 @@
 import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import * as usb from 'node-hid';
 import * as adb from 'adbkit';
-var Promise = require('bluebird');
+const fs = require('fs');
+const promise = require('bluebird');
+
+
+
+
+
 
 let win, serve;
 const args = process.argv.slice(1);
@@ -61,7 +66,76 @@ try {
     createWindow();
     const client = adb.createClient();
 
-    client.push("0b4210de0204","./teste.txt",'/sdcard')
+  
+
+/* async function ls() {
+  const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
+  console.log('stdout:', stdout);
+  console.log('stderr:', stderr);
+}
+ls(); */
+
+
+
+ /*  client.listDevices()
+.then(function(devices) {
+  return promise.map(devices, function(device) {
+    return client.push(device.id, '01 - My Champion - Berlin.mp3', 'storage/3A8F-1A17/teste.txt')
+      .then(function(transfer) {
+        return new Promise(function(resolve, reject) {
+          transfer.on('progress', function(stats) {
+            console.log('[%s] Pushed %d bytes so far',
+              device.id,
+              stats.bytesTransferred)
+          })
+          transfer.on('end', function() {
+            console.log('[%s] Push complete', device.id)
+            resolve()
+          })
+          transfer.on('error', reject)
+        })
+      })
+  })
+})
+.then(function() {
+  console.log('Done pushing foo.txt to all connected devices')
+})
+.catch(function(err) {
+  console.error('Something went wrong:', err.stack)
+}) */
+
+
+
+  client.listDevices()
+.then(function(devices) {
+  console.log(devices);
+  return promise.map(devices, function(device) {
+    return client.push(device.id, "", 'storage/3A8F-1A17/teste.txt')
+      .then(function(transfer) {
+        return new Promise(function(resolve, reject) {
+          transfer.on('progress', function(stats) {
+            console.log('[%s] Pushed %d bytes so far',
+              device.id,
+              stats.bytesTransferred)
+          })
+          transfer.on('end', function() {
+            console.log('[%s] Push complete', device.id)
+            resolve()
+          })
+          transfer.on('error', reject)
+        })
+      })
+  })
+})
+.then(function() {
+  console.log('Done pushing foo.txt to all connected devices')
+})
+.catch(function(err) {
+  console.error('Something went wrong:', err.stack)
+})
+
+
+   /*  client.push("0b4210de0204",'teste.txt','storage/3A8F-1A17')
     .then( (transfer : any) => {
         return new Promise( (resolve : any,reject : any) => {
           transfer.on('end', () => {
@@ -70,12 +144,12 @@ try {
           })
         } 
         )}
-    )
+    ) */
 
-    ipcMain.on("syncMessage", (event,arg) => {
+    /* ipcMain.on("syncMessage", (event,arg) => {
       console.log(arg);
       event.returnValue = { device : 1, name : "teste" };
-    })
+    }) */
     // const devices = usb.devices();
     // console.log(devices);
     // let deviceInfo = devices.find( elem => {

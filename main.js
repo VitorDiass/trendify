@@ -4,7 +4,11 @@ var electron_1 = require("electron");
 var path = require("path");
 var url = require("url");
 var adb = require("adbkit");
-var Promise = require('bluebird');
+var fs = require('fs');
+var util = require('util');
+var promise = require("bluebird");
+var exec = util.promisify(require('child_process').exec);
+var youtube = require('@microlink/youtube-dl');
 var win, serve;
 var args = process.argv.slice(1);
 serve = args.some(function (val) { return val === '--serve'; });
@@ -52,19 +56,86 @@ try {
     electron_1.app.on('ready', function () {
         createWindow();
         var client = adb.createClient();
-        client.push("0b4210de0204", "./teste.txt", '/sdcard')
-            .then(function (transfer) {
-            return new Promise(function (resolve, reject) {
-                transfer.on('end', function () {
-                    console.log("ended");
-                    resolve();
+        /* async function ls() {
+          const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
+          console.log('stdout:', stdout);
+          console.log('stderr:', stderr);
+        }
+        ls(); */
+        var video = youtube("https://www.youtube.com/watch?v=KnlFgBfc6pE", "['--format=mp3']");
+        video.on('info', function (info) {
+            console.log('Download started');
+            console.log('filename: ' + info._filename);
+            console.log('size: ' + info.size);
+        });
+        var res = video.pipe(fs.createWriteStream("output.mp3"));
+        /*  client.listDevices()
+       .then(function(devices) {
+         return promise.map(devices, function(device) {
+           return client.push(device.id, '01 - My Champion - Berlin.mp3', 'storage/3A8F-1A17/teste.txt')
+             .then(function(transfer) {
+               return new Promise(function(resolve, reject) {
+                 transfer.on('progress', function(stats) {
+                   console.log('[%s] Pushed %d bytes so far',
+                     device.id,
+                     stats.bytesTransferred)
+                 })
+                 transfer.on('end', function() {
+                   console.log('[%s] Push complete', device.id)
+                   resolve()
+                 })
+                 transfer.on('error', reject)
+               })
+             })
+         })
+       })
+       .then(function() {
+         console.log('Done pushing foo.txt to all connected devices')
+       })
+       .catch(function(err) {
+         console.error('Something went wrong:', err.stack)
+       }) */
+        video.on('end', function () {
+            client.listDevices()
+                .then(function (devices) {
+                console.log(devices);
+                return promise.map(devices, function (device) {
+                    return client.push(device.id, res, 'storage/3A8F-1A17/teste.txt')
+                        .then(function (transfer) {
+                        return new Promise(function (resolve, reject) {
+                            transfer.on('progress', function (stats) {
+                                console.log('[%s] Pushed %d bytes so far', device.id, stats.bytesTransferred);
+                            });
+                            transfer.on('end', function () {
+                                console.log('[%s] Push complete', device.id);
+                                resolve();
+                            });
+                            transfer.on('error', reject);
+                        });
+                    });
                 });
+            })
+                .then(function () {
+                console.log('Done pushing foo.txt to all connected devices');
+            })
+                .catch(function (err) {
+                console.error('Something went wrong:', err.stack);
             });
         });
-        electron_1.ipcMain.on("syncMessage", function (event, arg) {
-            console.log(arg);
-            event.returnValue = { device: 1, name: "teste" };
-        });
+        /*  client.push("0b4210de0204",'teste.txt','storage/3A8F-1A17')
+         .then( (transfer : any) => {
+             return new Promise( (resolve : any,reject : any) => {
+               transfer.on('end', () => {
+                 console.log("ended");
+                 resolve();
+               })
+             }
+             )}
+         ) */
+        /* ipcMain.on("syncMessage", (event,arg) => {
+          console.log(arg);
+          event.returnValue = { device : 1, name : "teste" };
+        }) */
         // const devices = usb.devices();
         // console.log(devices);
         // let deviceInfo = devices.find( elem => {
