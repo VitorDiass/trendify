@@ -98,6 +98,7 @@ try {
               console.log('stderr:', stderr);
             }
             ls(); */
+            // https://www.youtube.com/watch?v=IGQBtbKSVhY
             electron_1.ipcMain.on("syncMessage", function (event) {
                 var args = [];
                 for (var _i = 1; _i < arguments.length; _i++) {
@@ -106,37 +107,71 @@ try {
                 var promisesArray = new Array();
                 args.forEach(function (element) {
                     promisesArray.push(new Promise(function (resolve, reject) {
-                        resolve(youtube(element, { filter: 'audioonly' }));
+                        console.log(element);
+                        var res = youtube(element, { filter: 'audioonly' });
+                        res.on('end', function () {
+                            console.log("aqui");
+                            resolve();
+                        });
+                        res.on('data', function (chunk) {
+                            console.log(res);
+                            console.log(chunk);
+                        });
+                        res.on('error', function () {
+                            console.log("error");
+                            event.returnValue = "error";
+                            reject();
+                        });
                     }));
                 });
                 Promise.all(promisesArray).then(function (res) {
+                    console.log(res);
                     res.forEach(function (elem) {
-                        client.listDevices()
-                            .then(function (devices) {
-                            return promise.map(devices, function (device) {
-                                return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
-                                    .then(function (transfer) {
-                                    return new Promise(function (resolve, reject) {
-                                        transfer.on('progress', function (stats) {
-                                            console.log('[%s] Pushed %d bytes so far', device.id, stats.bytesTransferred);
-                                        });
-                                        transfer.on('end', function () {
-                                            console.log('[%s] Push complete', device.id);
-                                            resolve();
-                                        });
-                                        transfer.on('error', reject);
-                                    });
+                        console.log(elem);
+                        client.push("0b4210de0204", elem, 'storage/3A8F-1A17/teste.mp3').then(function (transfer) {
+                            return new Promise(function (resolve, reject) {
+                                transfer.on('progress', function (stats) {
+                                    console.log('[%s] Pushed %d bytes so far', "0b4210de0204", stats.bytesTransferred);
                                 });
+                                transfer.on('end', function () {
+                                    console.log('[%s] Push complete', "0b4210de0204");
+                                    resolve();
+                                });
+                                transfer.on('error', reject);
                             });
-                        })
-                            .then(function () {
-                            console.log('Done pushing foo.txt to all connected devices');
-                            event.returnValue = "finished";
-                        })
-                            .catch(function (err) {
-                            console.error('Something went wrong:', err.stack);
                         });
                     });
+                    /* client.listDevices()
+                    .then(function (devices) {
+                      return promise.map(devices, function (device) {
+                        console.log(device.id);
+                        return promise.map(res, (elem) => {
+                        return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
+                          .then(function (transfer) {
+                            return new Promise(function (resolve, reject) {
+                              transfer.on('progress', function (stats) {
+                                console.log('[%s] Pushed %d bytes so far',
+                                  device.id,
+                                  stats.bytesTransferred)
+                              })
+                              transfer.on('end', function () {
+                                console.log('[%s] Push complete', device.id)
+                                resolve()
+                              })
+                              transfer.on('error', reject)
+                            })
+                          })
+                        })
+                      })
+                    })
+                    .then(function () {
+                      console.log('Done pushing foo.txt to all connected devices');
+                      event.returnValue = "finished";
+                    })
+                    .catch(function (err) {
+                      console.error('Something went wrong:', err.stack)
+                    })
+                 */
                 });
             });
             return [2 /*return*/];

@@ -2,7 +2,6 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as adb from 'adbkit';
-import { element } from '@angular/core/src/render3';
 const fs = require('fs');
 const promise = require('bluebird');
 const youtube = require('ytdl-core');
@@ -76,19 +75,54 @@ try {
 }
 ls(); */
 
-
+// https://www.youtube.com/watch?v=IGQBtbKSVhY
 ipcMain.on("syncMessage", (event,...args) => {
   let promisesArray : Array<Promise<any>> = new Array<Promise<any>>();
   args.forEach(element => {
     promisesArray.push( new Promise((resolve,reject) => {
-        resolve(youtube(element, { filter: 'audioonly' }));
+      console.log(element);
+        const res = youtube(element, { filter: 'audioonly' });
+        res.on('end', () => {
+          console.log("aqui");
+          resolve();
+        });
+        res.on('data', (chunk) => {
+          console.log(res);
+          console.log(chunk);
+        });
+        res.on('error', () => {
+          console.log("error");
+          event.returnValue = "error";
+          reject();
+        })
     }))
   });
   Promise.all(promisesArray).then(res => {
+    console.log(res);
     res.forEach(elem => {
-      client.listDevices()
+        client.push("0b4210de0204",elem, 'storage/3A8F-1A17/teste.mp3').then( transfer => {
+          return new Promise( (resolve,reject) =>{
+            transfer.on('progress', function (stats) {
+              console.log('[%s] Pushed %d bytes so far',
+              "0b4210de0204",
+                stats.bytesTransferred)
+            })
+            transfer.on('end', function () {
+              console.log('[%s] Push complete', "0b4210de0204")
+              resolve();
+              
+            })
+            transfer.on('error', reject)
+          })
+      })
+      })
+     
+      
+      /* client.listDevices()
       .then(function (devices) {
         return promise.map(devices, function (device) {
+          console.log(device.id);
+          return promise.map(res, (elem) => {
           return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
             .then(function (transfer) {
               return new Promise(function (resolve, reject) {
@@ -104,6 +138,7 @@ ipcMain.on("syncMessage", (event,...args) => {
                 transfer.on('error', reject)
               })
             })
+          })
         })
       })
       .then(function () {
@@ -113,8 +148,8 @@ ipcMain.on("syncMessage", (event,...args) => {
       .catch(function (err) {
         console.error('Something went wrong:', err.stack)
       })
+   */
   
-    })
 
   })
 
