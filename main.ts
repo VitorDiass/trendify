@@ -2,8 +2,11 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as adb from 'adbkit';
+import { element } from '@angular/core/src/render3';
 const fs = require('fs');
 const promise = require('bluebird');
+const youtube = require('ytdl-core');
+
 
 
 
@@ -62,11 +65,9 @@ try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', () => {
+  app.on('ready', async () => {
     createWindow();
     const client = adb.createClient();
-
-  
 
 /* async function ls() {
   const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
@@ -76,63 +77,81 @@ try {
 ls(); */
 
 
-
- /*  client.listDevices()
-.then(function(devices) {
-  return promise.map(devices, function(device) {
-    return client.push(device.id, '01 - My Champion - Berlin.mp3', 'storage/3A8F-1A17/teste.txt')
-      .then(function(transfer) {
-        return new Promise(function(resolve, reject) {
-          transfer.on('progress', function(stats) {
-            console.log('[%s] Pushed %d bytes so far',
-              device.id,
-              stats.bytesTransferred)
-          })
-          transfer.on('end', function() {
-            console.log('[%s] Push complete', device.id)
-            resolve()
-          })
-          transfer.on('error', reject)
+ipcMain.on("syncMessage", (event,...args) => {
+  let promisesArray : Array<Promise<any>> = new Array<Promise<any>>();
+  args.forEach(element => {
+    promisesArray.push( new Promise((resolve,reject) => {
+        resolve(youtube(element, { filter: 'audioonly' }));
+    }))
+  });
+  Promise.all(promisesArray).then(res => {
+    res.forEach(elem => {
+      client.listDevices()
+      .then(function (devices) {
+        return promise.map(devices, function (device) {
+          return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
+            .then(function (transfer) {
+              return new Promise(function (resolve, reject) {
+                transfer.on('progress', function (stats) {
+                  console.log('[%s] Pushed %d bytes so far',
+                    device.id,
+                    stats.bytesTransferred)
+                })
+                transfer.on('end', function () {
+                  console.log('[%s] Push complete', device.id)
+                  resolve()
+                })
+                transfer.on('error', reject)
+              })
+            })
         })
       })
-  })
-})
-.then(function() {
-  console.log('Done pushing foo.txt to all connected devices')
-})
-.catch(function(err) {
-  console.error('Something went wrong:', err.stack)
-}) */
-
-
-
-  client.listDevices()
-.then(function(devices) {
-  console.log(devices);
-  return promise.map(devices, function(device) {
-    return client.push(device.id, "", 'storage/3A8F-1A17/teste.txt')
-      .then(function(transfer) {
-        return new Promise(function(resolve, reject) {
-          transfer.on('progress', function(stats) {
-            console.log('[%s] Pushed %d bytes so far',
-              device.id,
-              stats.bytesTransferred)
-          })
-          transfer.on('end', function() {
-            console.log('[%s] Push complete', device.id)
-            resolve()
-          })
-          transfer.on('error', reject)
-        })
+      .then(function () {
+        console.log('Done pushing foo.txt to all connected devices');
+        event.returnValue = "finished";
       })
+      .catch(function (err) {
+        console.error('Something went wrong:', err.stack)
+      })
+  
+    })
+
   })
+
 })
-.then(function() {
-  console.log('Done pushing foo.txt to all connected devices')
-})
-.catch(function(err) {
-  console.error('Something went wrong:', err.stack)
-})
+
+     /*  const readableStream = youtube('https://www.youtube.com/watch?v=5uzgHTe9vNY', { filter: 'audioonly' });
+      readableStream.on("progress", (res) => {
+        console.log(res);
+      })
+      
+      client.listDevices()
+        .then(function (devices) {
+          return promise.map(devices, function (device) {
+            return client.push(device.id, readableStream, 'storage/3A8F-1A17/teste.txt')
+              .then(function (transfer) {
+                return new Promise(function (resolve, reject) {
+                  transfer.on('progress', function (stats) {
+                    console.log('[%s] Pushed %d bytes so far',
+                      device.id,
+                      stats.bytesTransferred)
+                  })
+                  transfer.on('end', function () {
+                    console.log('[%s] Push complete', device.id)
+                    resolve()
+                  })
+                  transfer.on('error', reject)
+                })
+              })
+          })
+        })
+        .then(function () {
+          console.log('Done pushing foo.txt to all connected devices')
+        })
+        .catch(function (err) {
+          console.error('Something went wrong:', err.stack)
+        }) */
+    
 
 
    /*  client.push("0b4210de0204",'teste.txt','storage/3A8F-1A17')

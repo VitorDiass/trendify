@@ -5,7 +5,8 @@ import { Injectable } from '@angular/core';
 import { ipcRenderer, webFrame, remote } from 'electron';
 import * as childProcess from 'child_process';
 import * as fs from 'fs';
-import * as usb from 'node-hid';
+const promise = require('bluebird');
+const youtube = require('ytdl-core');
 
 @Injectable()
 export class ElectronService {
@@ -15,7 +16,8 @@ export class ElectronService {
   remote: typeof remote;
   childProcess: typeof childProcess;
   fs: typeof fs;
-  usb : typeof usb;
+  promise : typeof promise;
+  youtube : typeof youtube;
 
   constructor() {
     // Conditional imports
@@ -23,8 +25,8 @@ export class ElectronService {
       this.ipcRenderer = window.require('electron').ipcRenderer;
       this.webFrame = window.require('electron').webFrame;
       this.remote = window.require('electron').remote;
-      this.usb = window.require('node-hid');
-
+      this.promise = window.require('bluebird');
+      this.youtube = window.require('ytdl-core');
       this.childProcess = window.require('child_process');
       this.fs = window.require('fs');
     }

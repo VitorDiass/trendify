@@ -11,6 +11,9 @@ export class HomeComponent implements OnInit {
   public ipcRenderer;
 
   public deviceList : Array<any> = [];
+  public url : string;
+  public url1 : string;
+  public message : any;
 
   constructor(service : ElectronService) { 
     this.ipcRenderer = service.ipcRenderer;
@@ -19,7 +22,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
     this._ipcRendererOn();
-    this._ipcRendererSend();
+    //this._ipcRendererSend();
   }
 
   _ipcRendererOn(){
@@ -28,10 +31,18 @@ export class HomeComponent implements OnInit {
     })
   }
 
-  _ipcRendererSend(){
-    const reply = this.ipcRenderer.sendSync("syncMessage","GetDeviceList");
-    console.log(reply);
-    this.deviceList.push(reply);
+  async _ipcRendererSend(...args){
+    const reply = await  this.ipcRenderer.sendSync("syncMessage",...args);
+    return reply;   
+
+  }
+
+  async send(url : string, url1 : string){
+      if(url){
+        this._ipcRendererSend(url,url1).then(res => {
+          console.log(res);
+        })
+        }
   }
 
 

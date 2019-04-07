@@ -6,5 +6,8 @@
     {{device.device}}
     {{device.name}}
   </div>
+  <input type="text" [(ngModel)]="url">
+  <input type="text" [(ngModel)]="url1">
+  <button type="button" (click)="send(url,url1)">SEND</button>
   
 </div>
