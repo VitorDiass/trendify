@@ -2,6 +2,7 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as adb from 'adbkit';
+import { CLIENT_RENEG_LIMIT } from 'tls';
 const fs = require('fs');
 const promise = require('bluebird');
 const youtube = require('ytdl-core');
@@ -66,17 +67,46 @@ try {
   // Some APIs can only be used after this event occurs.
   app.on('ready', async () => {
     createWindow();
-    const client = adb.createClient();
+    let client = adb.createClient();
 
-/* async function ls() {
-  const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
-  console.log('stdout:', stdout);
-  console.log('stderr:', stderr);
-}
-ls(); */
+    /* async function ls() {
+      const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
+      console.log('stdout:', stdout);
+      console.log('stderr:', stderr);
+    }
+    ls(); */
+
+    ipcMain.on("syncMessage", (event, ...args) => {
+      let i = 1;
+      args.forEach(async url => {
+
+        await new Promise((resolve,reject) => {
+          let res = youtube(url, { filter: 'audioonly' });
+         
+          client.push("0b4210de0204", res, 'storage/3A8F-1A17/' + i).then(transfer => {
+            return new Promise((resolve, reject) => {
+              transfer.on('progress', function (stats) {
+                console.log('[%s] Pushed %d bytes so far',
+                  "0b4210de0204",
+                  stats.bytesTransferred)
+              })
+              transfer.on('end', function () {
+                console.log('[%s] Push complete', "0b4210de0204")
+                event.returnValue = `Concluido : ${url}`;
+                resolve();
+              })
+              transfer.on('error', reject)
+              
+            }).then(()=>{i++;client = adb.createClient();resolve()});
+          })
+        }) 
+       
+      })
+    })
+  })
 
 // https://www.youtube.com/watch?v=IGQBtbKSVhY
-ipcMain.on("syncMessage", (event,...args) => {
+/* ipcMain.on("syncMessage", (event,...args) => {
   let promisesArray : Array<Promise<any>> = new Array<Promise<any>>();
   args.forEach(element => {
     promisesArray.push( new Promise((resolve,reject) => {
@@ -115,7 +145,7 @@ ipcMain.on("syncMessage", (event,...args) => {
             transfer.on('error', reject)
           })
       })
-      })
+      }) */
      
       
       /* client.listDevices()
@@ -149,11 +179,8 @@ ipcMain.on("syncMessage", (event,...args) => {
         console.error('Something went wrong:', err.stack)
       })
    */
-  
 
-  })
 
-})
 
      /*  const readableStream = youtube('https://www.youtube.com/watch?v=5uzgHTe9vNY', { filter: 'audioonly' });
       readableStream.on("progress", (res) => {
@@ -222,7 +249,6 @@ ipcMain.on("syncMessage", (event,...args) => {
     //     console.log(e);
     //   }
     // }
-  });
 
   // Quit when all windows are closed.
   app.on('window-all-closed', () => {

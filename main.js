@@ -89,6 +89,7 @@ try {
     // Some APIs can only be used after this event occurs.
     electron_1.app.on('ready', function () { return __awaiter(_this, void 0, void 0, function () {
         var client;
+        var _this = this;
         return __generator(this, function (_a) {
             createWindow();
             client = adb.createClient();
@@ -98,85 +99,173 @@ try {
               console.log('stderr:', stderr);
             }
             ls(); */
-            // https://www.youtube.com/watch?v=IGQBtbKSVhY
             electron_1.ipcMain.on("syncMessage", function (event) {
                 var args = [];
                 for (var _i = 1; _i < arguments.length; _i++) {
                     args[_i - 1] = arguments[_i];
                 }
-                var promisesArray = new Array();
-                args.forEach(function (element) {
-                    promisesArray.push(new Promise(function (resolve, reject) {
-                        console.log(element);
-                        var res = youtube(element, { filter: 'audioonly' });
-                        res.on('end', function () {
-                            console.log("aqui");
-                            resolve();
-                        });
-                        res.on('data', function (chunk) {
-                            console.log(res);
-                            console.log(chunk);
-                        });
-                        res.on('error', function () {
-                            console.log("error");
-                            event.returnValue = "error";
-                            reject();
-                        });
-                    }));
-                });
-                Promise.all(promisesArray).then(function (res) {
-                    console.log(res);
-                    res.forEach(function (elem) {
-                        console.log(elem);
-                        client.push("0b4210de0204", elem, 'storage/3A8F-1A17/teste.mp3').then(function (transfer) {
-                            return new Promise(function (resolve, reject) {
-                                transfer.on('progress', function (stats) {
-                                    console.log('[%s] Pushed %d bytes so far', "0b4210de0204", stats.bytesTransferred);
-                                });
-                                transfer.on('end', function () {
-                                    console.log('[%s] Push complete', "0b4210de0204");
-                                    resolve();
-                                });
-                                transfer.on('error', reject);
-                            });
-                        });
+                var i = 1;
+                args.forEach(function (url) { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
+                                    var res = youtube(url, { filter: 'audioonly' });
+                                    client.push("0b4210de0204", res, 'storage/3A8F-1A17/' + i).then(function (transfer) {
+                                        return new Promise(function (resolve, reject) {
+                                            transfer.on('progress', function (stats) {
+                                                console.log('[%s] Pushed %d bytes so far', "0b4210de0204", stats.bytesTransferred);
+                                            });
+                                            transfer.on('end', function () {
+                                                console.log('[%s] Push complete', "0b4210de0204");
+                                                event.returnValue = "Concluido : " + url;
+                                                resolve();
+                                            });
+                                            transfer.on('error', reject);
+                                        }).then(function () { i++; client = adb.createClient(); resolve(); });
+                                    });
+                                })];
+                            case 1:
+                                _a.sent();
+                                return [2 /*return*/];
+                        }
                     });
-                    /* client.listDevices()
-                    .then(function (devices) {
-                      return promise.map(devices, function (device) {
-                        console.log(device.id);
-                        return promise.map(res, (elem) => {
-                        return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
-                          .then(function (transfer) {
-                            return new Promise(function (resolve, reject) {
-                              transfer.on('progress', function (stats) {
-                                console.log('[%s] Pushed %d bytes so far',
-                                  device.id,
-                                  stats.bytesTransferred)
-                              })
-                              transfer.on('end', function () {
-                                console.log('[%s] Push complete', device.id)
-                                resolve()
-                              })
-                              transfer.on('error', reject)
-                            })
-                          })
-                        })
-                      })
-                    })
-                    .then(function () {
-                      console.log('Done pushing foo.txt to all connected devices');
-                      event.returnValue = "finished";
-                    })
-                    .catch(function (err) {
-                      console.error('Something went wrong:', err.stack)
-                    })
-                 */
-                });
+                }); });
             });
             return [2 /*return*/];
         });
     }); });
+    // https://www.youtube.com/watch?v=IGQBtbKSVhY
+    /* ipcMain.on("syncMessage", (event,...args) => {
+      let promisesArray : Array<Promise<any>> = new Array<Promise<any>>();
+      args.forEach(element => {
+        promisesArray.push( new Promise((resolve,reject) => {
+          console.log(element);
+            const res = youtube(element, { filter: 'audioonly' });
+            res.on('end', () => {
+              console.log("aqui");
+              resolve();
+            });
+            res.on('data', (chunk) => {
+              console.log(res);
+              console.log(chunk);
+            });
+            res.on('error', () => {
+              console.log("error");
+              event.returnValue = "error";
+              reject();
+            })
+        }))
+      });
+      Promise.all(promisesArray).then(res => {
+        console.log(res);
+        res.forEach(elem => {
+            client.push("0b4210de0204",elem, 'storage/3A8F-1A17/teste.mp3').then( transfer => {
+              return new Promise( (resolve,reject) =>{
+                transfer.on('progress', function (stats) {
+                  console.log('[%s] Pushed %d bytes so far',
+                  "0b4210de0204",
+                    stats.bytesTransferred)
+                })
+                transfer.on('end', function () {
+                  console.log('[%s] Push complete', "0b4210de0204")
+                  resolve();
+                  
+                })
+                transfer.on('error', reject)
+              })
+          })
+          }) */
+    /* client.listDevices()
+    .then(function (devices) {
+      return promise.map(devices, function (device) {
+        console.log(device.id);
+        return promise.map(res, (elem) => {
+        return client.push(device.id, elem, 'storage/3A8F-1A17/teste.mp3')
+          .then(function (transfer) {
+            return new Promise(function (resolve, reject) {
+              transfer.on('progress', function (stats) {
+                console.log('[%s] Pushed %d bytes so far',
+                  device.id,
+                  stats.bytesTransferred)
+              })
+              transfer.on('end', function () {
+                console.log('[%s] Push complete', device.id)
+                resolve()
+              })
+              transfer.on('error', reject)
+            })
+          })
+        })
+      })
+    })
+    .then(function () {
+      console.log('Done pushing foo.txt to all connected devices');
+      event.returnValue = "finished";
+    })
+    .catch(function (err) {
+      console.error('Something went wrong:', err.stack)
+    })
+ */
+    /*  const readableStream = youtube('https://www.youtube.com/watch?v=5uzgHTe9vNY', { filter: 'audioonly' });
+     readableStream.on("progress", (res) => {
+       console.log(res);
+     })
+     
+     client.listDevices()
+       .then(function (devices) {
+         return promise.map(devices, function (device) {
+           return client.push(device.id, readableStream, 'storage/3A8F-1A17/teste.txt')
+             .then(function (transfer) {
+               return new Promise(function (resolve, reject) {
+                 transfer.on('progress', function (stats) {
+                   console.log('[%s] Pushed %d bytes so far',
+                     device.id,
+                     stats.bytesTransferred)
+                 })
+                 transfer.on('end', function () {
+                   console.log('[%s] Push complete', device.id)
+                   resolve()
+                 })
+                 transfer.on('error', reject)
+               })
+             })
+         })
+       })
+       .then(function () {
+         console.log('Done pushing foo.txt to all connected devices')
+       })
+       .catch(function (err) {
+         console.error('Something went wrong:', err.stack)
+       }) */
+    /*  client.push("0b4210de0204",'teste.txt','storage/3A8F-1A17')
+     .then( (transfer : any) => {
+         return new Promise( (resolve : any,reject : any) => {
+           transfer.on('end', () => {
+             console.log("ended");
+             resolve();
+           })
+         }
+         )}
+     ) */
+    /* ipcMain.on("syncMessage", (event,arg) => {
+      console.log(arg);
+      event.returnValue = { device : 1, name : "teste" };
+    }) */
+    // const devices = usb.devices();
+    // console.log(devices);
+    // let deviceInfo = devices.find( elem => {
+    //   return elem.vendorId === 1452 && elem.productId === 34304
+    // })
+    // if(deviceInfo){
+    //   try{
+    //   const device = new usb.HID(deviceInfo.path);
+    //   if(device) {
+    //   }
+    // }
+    //   catch(e){
+    //     console.log(e);
+    //   }
+    // }
     // Quit when all windows are closed.
     electron_1.app.on('window-all-closed', function () {
         // On OS X it is common for applications and their menu bar
