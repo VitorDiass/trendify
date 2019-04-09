@@ -2,7 +2,6 @@ import { app, BrowserWindow, screen, ipcMain } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
 import * as adb from 'adbkit';
-import { CLIENT_RENEG_LIMIT } from 'tls';
 const fs = require('fs');
 const promise = require('bluebird');
 const youtube = require('ytdl-core');
@@ -78,7 +77,6 @@ try {
 
     ipcMain.on("syncMessage", async (event, ...args) => {
       let i = 1;
-      //args.forEach(async url => {
         for(let arg of args){
          
             await new Promise((resolve,reject) => {
