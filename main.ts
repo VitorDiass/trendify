@@ -65,9 +65,11 @@ try {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  app.on('ready', async () => {
+  app.on('ready', () => {
     createWindow();
     let client = adb.createClient();
+    const syncService = client.syncService("0b4210de0204");
+    
 
     /* async function ls() {
       const { stdout, stderr } = await exec('adb push teste.txt storage/3A8F-1A17');
@@ -77,8 +79,33 @@ try {
     ls(); */
 
     ipcMain.on("syncMessage", (event, ...args) => {
-      let i = 1;
-      args.forEach(async url => {
+      if(syncService){
+        syncService.then(service => {
+          let i = 0;
+          args.forEach(url => {
+            let res = youtube(url, {filter : 'audioonly'});
+            service.push(res,'storage/3A8F-1A17/' + i).then(transfer => {
+              return new Promise((resolve, reject) => {
+                transfer.on('progress', function (stats) {
+                  console.log('[%s] Pushed %d bytes so far',
+                    "0b4210de0204",
+                    stats.bytesTransferred)
+                })
+                transfer.on('end', function () {
+                  console.log('[%s] Push complete', "0b4210de0204")
+                  event.returnValue = `Concluido : ${url}`;
+                  i++;
+                  resolve();
+                })
+                transfer.on('error', reject)
+            })
+          })
+        })
+      })
+    }})
+  })
+    
+      /* args.forEach(async url => {
 
         await new Promise((resolve,reject) => {
           let res = youtube(url, { filter: 'audioonly' });
@@ -101,9 +128,7 @@ try {
           })
         }) 
        
-      })
-    })
-  })
+      }) */
 
 // https://www.youtube.com/watch?v=IGQBtbKSVhY
 /* ipcMain.on("syncMessage", (event,...args) => {
