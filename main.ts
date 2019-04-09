@@ -76,34 +76,37 @@ try {
     }
     ls(); */
 
-    ipcMain.on("syncMessage", (event, ...args) => {
+    ipcMain.on("syncMessage", async (event, ...args) => {
       let i = 1;
-      args.forEach(async url => {
-
-        await new Promise((resolve,reject) => {
-          let res = youtube(url, { filter: 'audioonly' });
+      //args.forEach(async url => {
+        for(let arg of args){
          
-          client.push("0b4210de0204", res, 'storage/3A8F-1A17/' + i).then(transfer => {
-            return new Promise((resolve, reject) => {
-              transfer.on('progress', function (stats) {
-                console.log('[%s] Pushed %d bytes so far',
-                  "0b4210de0204",
-                  stats.bytesTransferred)
+            await new Promise((resolve,reject) => {
+              let res = youtube(arg, { filter: 'audioonly' });
+             
+              client.push("0b4210de0204", res, 'storage/3A8F-1A17/' + i).then(transfer => {
+                return new Promise((resolve, reject) => {
+                  transfer.on('progress', function (stats) {
+                    console.log('[%s] Pushed %d bytes so far',
+                      "0b4210de0204",
+                      stats.bytesTransferred)
+                  })
+                  transfer.on('end', function () {
+                    console.log('[%s] Push complete', "0b4210de0204")
+                    event.returnValue = `Concluido : ${url}`;
+                    resolve();
+                  })
+                  transfer.on('error', reject)
+                  
+                }).then(()=>{i++;client = adb.createClient();resolve()});
               })
-              transfer.on('end', function () {
-                console.log('[%s] Push complete', "0b4210de0204")
-                event.returnValue = `Concluido : ${url}`;
-                resolve();
-              })
-              transfer.on('error', reject)
-              
-            }).then(()=>{i++;client = adb.createClient();resolve()});
-          })
-        }) 
-       
+            }) 
+        }
       })
     })
-  })
+
+      
+  //})
 
 // https://www.youtube.com/watch?v=IGQBtbKSVhY
 /* ipcMain.on("syncMessage", (event,...args) => {
