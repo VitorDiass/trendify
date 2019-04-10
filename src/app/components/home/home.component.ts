@@ -21,29 +21,83 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._ipcRendererOn();
+    this.fetchInfo();
     //this._ipcRendererSend();
   }
 
-  _ipcRendererOn(){
-    this.ipcRenderer.on('asynchronous-reply', (event,arg) => {
-      console.log(event,arg);
+  /**
+   * _ipcRendererOn - to reveice a reply of an asynchronous message from the main process
+   * @channel string used message identifier
+   */
+
+  _ipcRendererOn(channel : string) : Promise<any>{
+    return new Promise((resolve,reject) => {
+      this.ipcRenderer.on(channel, (event,arg) => {
+        if(event && arg) {
+          resolve({response : arg});
+        }else{
+          reject();
+        }
+      })
     })
   }
 
-  async _ipcRendererSend(...args){
-    const reply = await  this.ipcRenderer.sendSync("syncMessage",...args);
-    return reply;   
-
-  }
-
-  async send(url : string, url1 : string){
-      if(url){
-        this._ipcRendererSend(url,url1).then(res => {
-          console.log(res);
-        })
+  _ipcRendererOnce(channel : string) : Promise<any>{
+    return new Promise((resolve,reject) => {
+      this.ipcRenderer.once(channel, (event,arg) => {
+        if(event && arg) {
+          resolve({response : arg});
+        }else{
+          reject();
         }
+      })
+    })
   }
+  /**
+   * _ipcRendererSend - Send an asynchronous message to the main process
+   * @channel string used as a message identifier
+   * @args optional values as arguments
+   */
+
+  _ipcRendererSend(channel : string, ...args){
+      this.ipcRenderer.send(channel,...args);
+  }
+
+   /**
+   * _ipcRendererSendSync - Send a synchronous message to the main process, blocking until gets the answer
+   * @channel string used as a message identifier
+   * @args optional values as arguments
+   */
+
+  _ipcRendererSendSync(channel : string ,...args){
+    const reply = this.ipcRenderer.sendSync(channel,...args);
+    return {res : reply};
+
+  }
+
+  getConnectedDevices(){
+    this._ipcRendererSend("getConnectedDevices");
+    this._ipcRendererOnce("getConnectedDevicesResp").then(devices => {
+      if(devices && devices.response){
+        this.deviceList = devices.response;
+      }
+    })
+    .catch(error => {
+      console.log(error);
+    })
+  }
+
+  fetchInfo(){
+    this.getConnectedDevices();
+  }
+
+    //send(url : string, url1 : string){
+    //     if(url){
+    //       this._ipcRendererSendSync(url,url1).then(res => {
+    //         console.log(res);
+    //       })
+    //       }
+    // }
 
 
 }

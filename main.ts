@@ -75,7 +75,18 @@ try {
     }
     ls(); */
 
-    ipcMain.on("syncMessage", async (event, ...args) => {
+    ipcMain.on("getConnectedDevices",(event,args) => {
+      if(client){
+        client.listDevices().then(devices => {
+          //console.log(devices);
+          event.sender.send("getConnectedDevicesResp",devices);
+        })
+      }
+    })
+
+    
+
+    /* ipcMain.on("syncMessage", async (event, ...args) => {
       let i = 1;
         for(let arg of args){
          
@@ -100,8 +111,8 @@ try {
               })
             }) 
         }
-      })
-    })
+      })*/
+    }) 
 
       
   //})

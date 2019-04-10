@@ -1,10 +1,10 @@
 <div class="container">
   <h1 class="title">
-    {{ 'PAGES.HOME.TITLE' | translate }}
+    <!-- {{ 'PAGES.HOME.TITLE' | translate }} -->
   </h1>
   <div *ngFor="let device of deviceList">
-    {{device.device}}
-    {{device.name}}
+    {{device.id}}
+    {{device.type}}
   </div>
   <input type="text" [(ngModel)]="url">
   <input type="text" [(ngModel)]="url1">
