@@ -83,6 +83,7 @@
   },
   "dependencies": {
     "adbkit": "^2.11.0",
+    "bluebird": "^3.5.4",
     "stream": "0.0.2",
     "ytdl-core": "^0.29.1"
   }

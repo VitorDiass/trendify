@@ -23,9 +23,11 @@
               "src/favicon.icns",
               "src/favicon.256x256.png",
               "src/favicon.512x512.png"
+              
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "assets/lib/photon-0.1.2-dist/css/photon.min.css"
             ],
             "scripts": ["./node_modules/miniget/lib/index.js"]
           },

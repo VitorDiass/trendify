@@ -1,5 +1,6 @@
 <!doctype html>
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>AngularElectron</title>
@@ -7,8 +8,26 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+
+  <link type="text/css" href="../assets/lib/photon-0.1.2-dist/css/photon.min.css">
+
+  <script type="text/javascript" href="../assets/lib/photon-0.1.2-dist/template-app/app.js"></script>
 </head>
+
 <body>
-  <app-root>Loading...</app-root>
+  <div class="window">
+      <header class="toolbar toolbar-header">
+          <h1 class="title">Header</h1>
+        </header>
+    <div class="window-content">
+      <app-root></app-root>
+    </div>
+    <footer class="toolbar toolbar-footer">
+        <h1 class="title">Footer</h1>
+      </footer>
+  </div>
+
 </body>
+
 </html>
