@@ -1,0 +1,53 @@
+<!-- <div class="container">
+  <h1 class="title">
+  </h1>
+  <div *ngFor="let device of deviceList">
+    {{device.id}}
+    {{device.type}}
+  </div>
+  <input type="text" [(ngModel)]="url">
+  <input type="text" [(ngModel)]="url1">
+  <button type="button" (click)="send(url,url1)">SEND</button>  
+</div> -->
+
+  
+<div class="pane-group">
+
+        <div class="pane-sm sidebar">
+            <nav class="nav-group">
+                <h5 class="nav-group-title"></h5>
+                <a class="nav-group-item" (click)="updateNavBar('about')" [ngClass]="{'active' : aboutActive}">
+                  <span class="icon icon-home"></span>
+                  About
+                </a>
+                <a class="nav-group-item" (click)="updateNavBar('devices')" [ngClass]="{'active' : devicesActive}">
+                  <span class="icon icon-mobile"></span>
+                  Devices
+                </a>
+                <span class="nav-group-item">
+                  <span class="icon icon-folder"></span>
+                  Documents
+                </span>
+                <span class="nav-group-item">
+                  <span class="icon icon-signal"></span>
+                  AirPlay
+                </span>
+                <span class="nav-group-item">
+                  <span class="icon icon-print"></span>
+                  Applications
+                </span>
+                <span class="nav-group-item">
+                  <span class="icon icon-cloud"></span>
+                  Desktop
+                </span>
+              </nav>
+        </div>
+      
+        <div class="pane">
+         <devices *ngIf="devicesActive"></devices>
+         <about *ngIf="aboutActive"></about>
+        </div>
+      
+      </div>
+    
+  

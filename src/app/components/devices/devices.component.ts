@@ -1,0 +1,23 @@
+import { Component, OnInit } from '@angular/core';
+import { ElectronService } from '../../providers/electron.service';
+
+@Component({
+  selector: 'devices',
+  templateUrl: './devices.component.html',
+  styleUrls: ['./devices.component.scss']
+})
+export class DevicesComponent implements OnInit {
+
+
+
+  constructor() { 
+    
+
+  }
+
+  ngOnInit() {
+
+
+  }
+
+}

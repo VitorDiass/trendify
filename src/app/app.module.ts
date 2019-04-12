@@ -17,7 +17,14 @@ import { ElectronService } from './providers/electron.service';
 import { WebviewDirective } from './directives/webview.directive';
 
 import { AppComponent } from './app.component';
-import { HomeComponent } from './components/home/home.component';
+import { AboutComponent } from './components/about/about.component';
+import { BaseLayoutComponent } from './components/baseLayout/baseLayout.component';
+import { DevicesComponent } from './components/devices/devices.component';
+import { BaseService } from './providers/base.service';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatCardModule } from '@angular/material';
+
 
 
 
@@ -29,7 +36,9 @@ export function HttpLoaderFactory(http: HttpClient) {
 @NgModule({
   declarations: [
     AppComponent,
-    HomeComponent,
+    AboutComponent,
+    BaseLayoutComponent,
+    DevicesComponent,
     WebviewDirective
   ],
   imports: [
@@ -43,9 +52,12 @@ export function HttpLoaderFactory(http: HttpClient) {
         useFactory: (HttpLoaderFactory),
         deps: [HttpClient]
       }
-    })
+    }),
+    FlexLayoutModule,
+    BrowserAnimationsModule,
+    MatCardModule
   ],
-  providers: [ElectronService],
+  providers: [ElectronService, BaseService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
