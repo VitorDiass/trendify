@@ -46,6 +46,7 @@ var youtube = require('ytdl-core');
 var win, serve;
 var args = process.argv.slice(1);
 serve = args.some(function (val) { return val === '--serve'; });
+var connectedDeviceId = null;
 function createWindow() {
     var electronScreen = electron_1.screen;
     var size = electronScreen.getPrimaryDisplay().workAreaSize;
@@ -89,6 +90,7 @@ try {
     // Some APIs can only be used after this event occurs.
     electron_1.app.on('ready', function () { return __awaiter(_this, void 0, void 0, function () {
         var client;
+        var _this = this;
         return __generator(this, function (_a) {
             createWindow();
             client = adb.createClient();
@@ -100,11 +102,90 @@ try {
             ls(); */
             electron_1.ipcMain.on("getConnectedDevices", function (event, args) {
                 if (client) {
-                    client.listDevices().then(function (devices) {
+                    client.listDevicesWithPaths().then(function (devices) {
                         //console.log(devices);
                         event.sender.send("getConnectedDevicesResp", devices);
                     });
                 }
+            });
+            electron_1.ipcMain.on("setConnectedDevice", function (event, args) {
+                if (args) {
+                    connectedDeviceId = args;
+                    event.sender.send("setConnectedDeviceResp", args);
+                }
+            });
+            //getState has to receive the devices ID;
+            /*   ipcMain.on("getState", (event, ...args)=> {
+                if(client){
+                  let res = [];
+                  args.forEach(async device => {
+                    await client.getState(device.id).then(deviceState => {
+                      console.log(deviceState);
+                      res.push(deviceState);
+                    })
+                  })
+                  event.sender.send("getStateResp",res);
+          
+                  
+                }
+              }) */
+            electron_1.ipcMain.on("download", function (event) {
+                var args = [];
+                for (var _i = 1; _i < arguments.length; _i++) {
+                    args[_i - 1] = arguments[_i];
+                }
+                return __awaiter(_this, void 0, void 0, function () {
+                    var i, _loop_1, _a, args_1, arg;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0:
+                                i = 1;
+                                if (!connectedDeviceId) return [3 /*break*/, 5];
+                                _loop_1 = function (arg) {
+                                    return __generator(this, function (_a) {
+                                        switch (_a.label) {
+                                            case 0: return [4 /*yield*/, new Promise(function (resolve, reject) {
+                                                    var res = youtube(arg, { filter: 'audioonly' });
+                                                    client.push(connectedDeviceId, res, 'storage/3A8F-1A17/' + i).then(function (transfer) {
+                                                        return new Promise(function (resolve, reject) {
+                                                            transfer.on('progress', function (stats) {
+                                                                console.log('[%s] Pushed %d bytes so far', "0b4210de0204", stats.bytesTransferred);
+                                                            });
+                                                            transfer.on('end', function () {
+                                                                console.log('[%s] Push complete', "0b4210de0204");
+                                                                event.sender.send("downloadCompleted", "Concluido : " + url);
+                                                                resolve();
+                                                            });
+                                                            transfer.on('error', reject);
+                                                        }).then(function () { i++; client = adb.createClient(); resolve(); });
+                                                    });
+                                                })];
+                                            case 1:
+                                                _a.sent();
+                                                return [2 /*return*/];
+                                        }
+                                    });
+                                };
+                                _a = 0, args_1 = args;
+                                _b.label = 1;
+                            case 1:
+                                if (!(_a < args_1.length)) return [3 /*break*/, 4];
+                                arg = args_1[_a];
+                                return [5 /*yield**/, _loop_1(arg)];
+                            case 2:
+                                _b.sent();
+                                _b.label = 3;
+                            case 3:
+                                _a++;
+                                return [3 /*break*/, 1];
+                            case 4: return [3 /*break*/, 6];
+                            case 5:
+                                console.log("no device");
+                                _b.label = 6;
+                            case 6: return [2 /*return*/];
+                        }
+                    });
+                });
             });
             return [2 /*return*/];
         });

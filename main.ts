@@ -6,15 +6,11 @@ const fs = require('fs');
 const promise = require('bluebird');
 const youtube = require('ytdl-core');
 
-
-
-
-
-
-
 let win, serve;
 const args = process.argv.slice(1);
 serve = args.some(val => val === '--serve');
+
+let connectedDeviceId : string = null;
 
 function createWindow() {
 
@@ -77,23 +73,52 @@ try {
 
     ipcMain.on("getConnectedDevices",(event,args) => {
       if(client){
-        client.listDevices().then(devices => {
+        client.listDevicesWithPaths().then(devices => {
           //console.log(devices);
           event.sender.send("getConnectedDevicesResp",devices);
         })
       }
-    })
+    });
+
+    ipcMain.on("setConnectedDevice",(event,args) => {
+      if(args){
+        connectedDeviceId = args;
+        event.sender.send("setConnectedDeviceResp",args);
+      }
+
+    });
+
+    //getState has to receive the devices ID;
+  /*   ipcMain.on("getState", (event, ...args)=> {
+      if(client){
+        let res = [];
+        args.forEach(async device => {
+          await client.getState(device.id).then(deviceState => {
+            console.log(deviceState);
+            res.push(deviceState);
+          })
+        })
+        event.sender.send("getStateResp",res);
+
+        
+      }
+    }) */
+    
+
+
+  
 
     
 
-    /* ipcMain.on("syncMessage", async (event, ...args) => {
+     ipcMain.on("download", async (event, ...args) => {
       let i = 1;
+      if(connectedDeviceId){
         for(let arg of args){
          
             await new Promise((resolve,reject) => {
               let res = youtube(arg, { filter: 'audioonly' });
              
-              client.push("0b4210de0204", res, 'storage/3A8F-1A17/' + i).then(transfer => {
+              client.push(connectedDeviceId, res, 'storage/3A8F-1A17/' + i).then(transfer => {
                 return new Promise((resolve, reject) => {
                   transfer.on('progress', function (stats) {
                     console.log('[%s] Pushed %d bytes so far',
@@ -102,7 +127,7 @@ try {
                   })
                   transfer.on('end', function () {
                     console.log('[%s] Push complete', "0b4210de0204")
-                    event.returnValue = `Concluido : ${url}`;
+                    event.sender.send("downloadCompleted",`Concluido : ${url}`);
                     resolve();
                   })
                   transfer.on('error', reject)
@@ -111,9 +136,14 @@ try {
               })
             }) 
         }
-      })*/
+      }else{
+        console.log("no device");
+      }
     }) 
-
+  
+  
+  
+  })
       
   //})
 

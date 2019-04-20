@@ -24,6 +24,7 @@ import { BaseService } from './providers/base.service';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatCardModule } from '@angular/material';
+import { YoutubeComponent } from './components/youtube/youtube.component';
 
 
 
@@ -39,7 +40,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     AboutComponent,
     BaseLayoutComponent,
     DevicesComponent,
-    WebviewDirective
+    WebviewDirective,
+    YoutubeComponent
   ],
   imports: [
     BrowserModule,

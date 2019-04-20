@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { BaseService } from '../../providers/base.service';
+import { DevicesComponent } from '../devices/devices.component';
 
 @Component({
     selector: 'baseLayout',
@@ -8,18 +9,18 @@ import { BaseService } from '../../providers/base.service';
 })
 export class BaseLayoutComponent implements OnInit {
 
-    public aboutActive: boolean = false;
+    public aboutActive   : boolean = false;
     public devicesActive : boolean = false;
-    public baseService: BaseService;
-    public deviceList: Array<any> = [];
+    public youtubeActive : boolean = false; 
+    
+    public deviceList: Array<any> = [];    
 
-    constructor(service: BaseService) {
-        this.baseService = service;
+    constructor(public baseService: BaseService) {
+        
     }
 
     ngOnInit() {
         this.fetchInfo();
-        //this._ipcRendererSend();
 
     }
 
@@ -31,10 +32,11 @@ export class BaseLayoutComponent implements OnInit {
         this.baseService._ipcRendererSend("getConnectedDevices");
         this.baseService._ipcRendererOnce("getConnectedDevicesResp").then(devices => {
             if (devices && devices.response) {
+                console.log(devices.response);
                 this.deviceList = devices.response;
             }
         })
-            .catch(error => {
+        .catch(error => {
                 console.log(error);
             })
     }
@@ -44,13 +46,20 @@ export class BaseLayoutComponent implements OnInit {
             case 'about': {
                 this.aboutActive = true;
                 this.devicesActive = false;
+                this.youtubeActive = false;
                 break;
             }
             case 'devices': {
                 this.devicesActive = true;
                 this.aboutActive = false;
+                this.youtubeActive = false;
                 this.getConnectedDevices();
                 break;
+            }
+            case 'youtube' : {
+                this.devicesActive = false;
+                this.aboutActive = false;
+                this.youtubeActive = true;
             }
             default:
                 break;

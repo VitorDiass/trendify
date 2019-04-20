@@ -1,7 +1,26 @@
 <div fxLayout="row wrap">
-        <mat-card>
-                <mat-card-content>
-                    box 1
-                </mat-card-content>
-            </mat-card>
-   </div>
+    <div *ngFor="let device of devices" fxFlex="33" style="margin:10px">
+        <mat-card style="padding:20px">
+            <mat-card-header style="padding:0px">
+                <div mat-card-avatar
+                    style="min-width: 15%;min-height: 71px;background-image: url('assets/img/smartphoneIcon.jpg');background-repeat: no-repeat;background-size: cover">
+                </div>
+                <mat-card-title>
+                    Type : {{device.type}}
+                </mat-card-title>
+                <mat-card-subtitle>Id : {{device.id}}</mat-card-subtitle>
+                <mat-card-subtitle>Path : {{device.path}}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-actions>
+                <div fxLayout="row">
+                <div fxFlex="18" fxLayoutAlign="center center">
+                    <span class="icon icon-record" style="color:#00BFA5"> ONLINE</span>
+                </div>
+                <div fxFlex fxLayoutAlign="end center">
+                    <button mat-raised-button [ngStyle]="{'background-color' : deviceId == device.id ? '#00BFA5' : ''}" (click)="setConnectedDevice(device.id)">Connect</button>
+                </div>
+            </div>
+            </mat-card-actions>
+        </mat-card>
+    </div>
+</div>

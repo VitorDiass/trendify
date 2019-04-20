@@ -24,9 +24,9 @@
                   <span class="icon icon-mobile"></span>
                   Devices
                 </a>
-                <span class="nav-group-item">
-                  <span class="icon icon-folder"></span>
-                  Documents
+                <span class="nav-group-item" (click)="updateNavBar('youtube')" [ngClass]="{'active' : youtubeActive}">
+                  <span class="icon icon-note-beamed"></span>
+                  Youtube
                 </span>
                 <span class="nav-group-item">
                   <span class="icon icon-signal"></span>
@@ -44,8 +44,9 @@
         </div>
       
         <div class="pane">
-         <devices *ngIf="devicesActive"></devices>
+         <devices *ngIf="devicesActive" [devices]="deviceList"></devices>
          <about *ngIf="aboutActive"></about>
+         <youtube *ngIf="youtubeActive"></youtube>
         </div>
       
       </div>
